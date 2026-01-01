@@ -50,33 +50,39 @@ const CURRENCY_ICONS = {
 };
 
 // Huiji Wiki URL mapping by collection type
+// Maps collection name to mapping key
 const HUIJI_COLLECTION_MAPPING = {
-    'Mounts': { key: 'mounts', urlPrefix: '' },
-    'Minions': { key: 'minions', urlPrefix: '' },
-    'Blue Mage': { key: 'actions', urlPrefix: '' },
-    'Triple Triad': { key: 'tripleTriad', urlPrefix: '' },
-    'Orchestrions': { key: 'orchestrions', urlPrefix: '' },
-    'Emotes': { key: 'emotes', urlPrefix: '' },
-    'Bardings': { key: 'bardings', urlPrefix: '' },
-    'Fashion Accessories': { key: 'fashionAccessories', urlPrefix: '' },
-    'Glasses': { key: 'glasses', urlPrefix: '' },
-    'Glamour': { key: 'items', urlPrefix: '物品:' },
-    'Framer Kits': { key: 'items', urlPrefix: '物品:' },
-    'Hairstyles': null, // Not supported - no names in data
+    'Mounts': 'mounts',
+    'Minions': 'minions',
+    'Blue Mage': null,  // No wiki link for Blue Mage
+    'Triple Triad': 'tripleTriad',
+    'Orchestrions': 'orchestrions',
+    'Emotes': 'emotes',
+    'Bardings': 'bardings',
+    'Fashion Accessories': 'fashionAccessories',
+    'Glasses': 'glasses',
+    'Glamour': 'items',
+    'Framer Kits': 'items',
+    'Hairstyles': 'hairstyles',
 };
 
 // Get Huiji Wiki URL for an item
 function getHuijiWikiUrl(item, collectionName) {
     if (!huijiMapping) return null;
 
-    const mapping = HUIJI_COLLECTION_MAPPING[collectionName];
-    if (!mapping) return null;
+    const mappingKey = HUIJI_COLLECTION_MAPPING[collectionName];
+    if (!mappingKey) return null;
 
-    const scName = huijiMapping[mapping.key]?.[item.Id];
+    const scName = huijiMapping[mappingKey]?.[item.Id];
     if (!scName) return null;
 
-    const urlPrefix = mapping.urlPrefix || '';
-    return `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(urlPrefix + scName)}`;
+    // Mounts don't need 物品: prefix, they use direct mount page
+    if (collectionName === 'Mounts') {
+        return `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(scName)}`;
+    }
+
+    // Everything else uses 物品: prefix
+    return `https://ff14.huijiwiki.com/wiki/${encodeURIComponent('物品:' + scName)}`;
 }
 
 // Create item card HTML
