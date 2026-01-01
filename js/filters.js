@@ -50,6 +50,12 @@ class FilterState {
         this.activeCategories = new Set();
         this.activePatches = new Set();
         this.searchQuery = '';
+        this.showNoSource = false; // 預設隱藏無來源項目
+    }
+
+    toggleShowNoSource() {
+        this.showNoSource = !this.showNoSource;
+        return this.showNoSource;
     }
 
     toggleCategory(category) {
@@ -76,6 +82,7 @@ class FilterState {
         this.activeCategories.clear();
         this.activePatches.clear();
         this.searchQuery = '';
+        // 不重置 showNoSource，保持使用者的選擇
     }
 
     hasActiveFilters() {
@@ -88,6 +95,11 @@ class FilterState {
      * Check if an item passes all active filters
      */
     passesFilters(item) {
+        // No source filter - hide items without sources by default
+        if (!this.showNoSource && (!item.Sources || item.Sources.length === 0)) {
+            return false;
+        }
+
         // Search filter
         if (this.searchQuery) {
             const nameMatch = item.Name?.toLowerCase().includes(this.searchQuery);

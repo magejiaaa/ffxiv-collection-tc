@@ -20,6 +20,7 @@ const elements = {
     searchInput: null,
     searchResults: null,
     clearFiltersBtn: null,
+    showNoSourceToggle: null,
     modal: null,
     modalClose: null,
     modalIcon: null,
@@ -56,6 +57,7 @@ function cacheElements() {
     elements.searchInput = document.getElementById('search-input');
     elements.searchResults = document.getElementById('search-results');
     elements.clearFiltersBtn = document.getElementById('clear-filters');
+    elements.showNoSourceToggle = document.getElementById('show-no-source-toggle');
     elements.modal = document.getElementById('item-modal');
     elements.modalClose = document.getElementById('modal-close');
     elements.modalIcon = document.getElementById('modal-icon');
@@ -102,6 +104,12 @@ function setupEventListeners() {
         filterState.clearAll();
         elements.searchInput.value = '';
         updateFilterUI();
+        renderItems();
+    });
+
+    // Show no source toggle
+    elements.showNoSourceToggle.addEventListener('change', (e) => {
+        filterState.showNoSource = e.target.checked;
         renderItems();
     });
 
@@ -280,6 +288,9 @@ function updateFilterUI() {
         const patchLabel = btn.dataset.patch;
         btn.classList.toggle('active', filterState.activePatches.has(patchLabel));
     });
+
+    // Update show no source toggle
+    elements.showNoSourceToggle.checked = filterState.showNoSource;
 }
 
 // Switch to a different collection
