@@ -643,6 +643,32 @@ body {
     margin-left: auto;
 }
 
+.source-wiki-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-gold);
+    color: white;
+    border-radius: 3px;
+    margin-left: 6px;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.source-wiki-link:hover {
+    background: #a18d64;
+}
+
+.source-wiki-link.search {
+    background: var(--accent);
+}
+
+.source-wiki-link.search:hover {
+    background: var(--accent-hover);
+}
+
 .source-details {
     font-size: 0.85rem;
     color: var(--text-secondary);

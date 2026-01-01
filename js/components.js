@@ -202,6 +202,98 @@ function translateSourceName(name, type) {
     return cleanFFXIVText(name);
 }
 
+// Get Huiji Wiki URL for a source (Instance, Achievement, Quest, Container)
+// Returns { url, isSearch } - isSearch indicates if this is a search URL (fallback)
+function getSourceWikiUrl(source) {
+    const sourceType = source.Type;
+    const sourceName = source.Name;
+    if (!sourceName) return null;
+
+    // Only support these source types
+    if (!['Instance', 'Achievement', 'Quest', 'Container'].includes(sourceType)) {
+        return null;
+    }
+
+    // Clean the name (remove FFXIV special characters)
+    const cleanName = cleanFFXIVText(sourceName);
+    if (!cleanName) return null;
+
+    // Try exact match first if mapping is available
+    if (huijiMapping && huijiMapping.sources) {
+        let scName = null;
+        let urlPrefix = '';
+
+        switch (sourceType) {
+            case 'Instance':
+                scName = huijiMapping.sources.instances?.[cleanName];
+                break;
+            case 'Achievement':
+                // Achievement names might have description, try to extract just the title
+                const achieveMatch = cleanName.match(/^([^:：]+)/);
+                if (achieveMatch) {
+                    scName = huijiMapping.sources.achievements?.[achieveMatch[1]];
+                }
+                if (!scName) {
+                    scName = huijiMapping.sources.achievements?.[cleanName];
+                }
+                break;
+            case 'Quest':
+                scName = huijiMapping.sources.quests?.[cleanName];
+                break;
+            case 'Container':
+                scName = huijiMapping.sources.items?.[cleanName];
+                urlPrefix = '物品:';
+                break;
+        }
+
+        if (scName) {
+            return {
+                url: `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(urlPrefix + scName)}`,
+                isSearch: false
+            };
+        }
+    }
+
+    // Fallback: use search URL with cleaned name
+    // Extract just the main name part for better search results
+    let searchName = cleanName;
+
+    // For achievements, extract just the title (before colon/description)
+    if (sourceType === 'Achievement') {
+        const match = cleanName.match(/^([^:：]+)/);
+        if (match) searchName = match[1];
+    }
+
+    return {
+        url: `https://ff14.huijiwiki.com/wiki/Special:搜索/${encodeURIComponent(searchName)}`,
+        isSearch: true
+    };
+}
+
+// Render source wiki link button
+function renderSourceWikiLink(source) {
+    const wikiResult = getSourceWikiUrl(source);
+    if (!wikiResult) return '';
+
+    const { url, isSearch } = wikiResult;
+    const title = isSearch ? '搜尋 Wiki' : '查看 Wiki';
+    const className = isSearch ? 'source-wiki-link search' : 'source-wiki-link';
+
+    // Use search icon for search links, external link icon for direct links
+    const icon = isSearch
+        ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+           </svg>`
+        : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+           </svg>`;
+
+    return `<a href="${url}" target="_blank" rel="noopener" class="${className}" title="${title}">${icon}</a>`;
+}
+
 // Render source in modal
 function renderSourceItem(source) {
     const div = document.createElement('div');
@@ -231,11 +323,13 @@ function renderSourceItem(source) {
     }
 
     const displayName = translateSourceName(source.Name, sourceType);
+    const wikiLinkHtml = renderSourceWikiLink(source);
 
     div.innerHTML = `
         <div class="source-header">
             <img src="${sourceIconUrl}" alt="" onerror="this.style.display='none'">
             <span class="source-name">${displayName}</span>
+            ${wikiLinkHtml}
             <span class="source-type">${getSourceTypeName(sourceType)}</span>
         </div>
         ${detailsHtml ? `<div class="source-details">${detailsHtml}</div>` : ''}
