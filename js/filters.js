@@ -25,15 +25,15 @@ const SOURCE_CATEGORIES = {
     Voyages: { name: '遠航探索', iconId: 65035 }
 };
 
-// Major patch versions for filtering
+// Major patch versions for filtering with expansion icons
 const PATCH_VERSIONS = [
-    { label: '7.x', minPatch: 7.0, maxPatch: 7.99 },
-    { label: '6.x', minPatch: 6.0, maxPatch: 6.99 },
-    { label: '5.x', minPatch: 5.0, maxPatch: 5.99 },
-    { label: '4.x', minPatch: 4.0, maxPatch: 4.99 },
-    { label: '3.x', minPatch: 3.0, maxPatch: 3.99 },
-    { label: '2.x', minPatch: 2.0, maxPatch: 2.99 },
-    { label: '未知', minPatch: 999, maxPatch: 9999 }
+    { label: '7.x', minPatch: 7.0, maxPatch: 7.99, iconId: 61880 }, // Dawntrail
+    { label: '6.x', minPatch: 6.0, maxPatch: 6.99, iconId: 61879 }, // Endwalker
+    { label: '5.x', minPatch: 5.0, maxPatch: 5.99, iconId: 61878 }, // Shadowbringers
+    { label: '4.x', minPatch: 4.0, maxPatch: 4.99, iconId: 61877 }, // Stormblood
+    { label: '3.x', minPatch: 3.0, maxPatch: 3.99, iconId: 61876 }, // Heavensward
+    { label: '2.x', minPatch: 2.0, maxPatch: 2.99, iconId: 61875 }, // A Realm Reborn
+    { label: '未知', minPatch: 999, maxPatch: 9999, iconId: 60074 }  // Unknown/question mark
 ];
 
 // Helper to get icon URL

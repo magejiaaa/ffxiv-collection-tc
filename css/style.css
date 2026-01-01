@@ -249,7 +249,10 @@ body {
 }
 
 .patch-btn {
-    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 4px;
@@ -257,6 +260,16 @@ body {
     font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.patch-btn img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.patch-btn span {
+    line-height: 1;
 }
 
 .patch-btn:hover {
