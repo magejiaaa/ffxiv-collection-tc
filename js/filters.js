@@ -16,13 +16,13 @@ const SOURCE_CATEGORIES = {
     DeepDungeon: { name: '深層迷宮', iconId: 61824 },
     BeastTribes: { name: '蠻族', iconId: 65016 },
     MogStation: { name: '商城', iconId: 61831 },
-    Achievement: { name: '成就', iconId: 61793 },
+    Achievement: { name: '成就', iconId: 6 },
     CompanySeals: { name: '軍票', iconId: 65005 },
     IslandSanctuary: { name: '無人島', iconId: 65096 },
     HuntSeals: { name: '狩獵', iconId: 65034 },
-    TreasureHunts: { name: '挖寶', iconId: 26001 },
+    TreasureHunts: { name: '挖寶', iconId: 115 },
     Crafting: { name: '製作', iconId: 62202 },
-    Voyages: { name: '探索', iconId: 60331 }
+    Voyages: { name: '探索', iconId: 65035 }
 };
 
 // Major patch versions for filtering
