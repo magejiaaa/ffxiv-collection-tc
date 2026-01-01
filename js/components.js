@@ -106,12 +106,20 @@ function createSourceFilterItem(categoryKey, categoryInfo, isActive) {
     return item;
 }
 
-// Create patch filter button
+// Create patch filter button with expansion icon
 function createPatchFilterButton(patchDef, isActive) {
     const btn = document.createElement('button');
     btn.className = `patch-btn${isActive ? ' active' : ''}`;
     btn.dataset.patch = patchDef.label;
-    btn.textContent = patchDef.label;
+
+    // Add expansion icon if available
+    if (patchDef.iconId) {
+        const iconUrl = getIconUrl(patchDef.iconId);
+        btn.innerHTML = `<img src="${iconUrl}" alt="${patchDef.label}" onerror="this.style.display='none'"><span>${patchDef.label}</span>`;
+    } else {
+        btn.textContent = patchDef.label;
+    }
+
     return btn;
 }
 

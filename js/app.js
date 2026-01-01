@@ -10,6 +10,14 @@ let filterState = new FilterState();
 let currentSort = 'name';
 let searchDebounceTimer = null;
 
+// Pagination state for performance
+const ITEMS_PER_PAGE = 50;
+let currentFilteredItems = [];
+let currentRenderedCount = 0;
+let isLoadingMore = false;
+let infiniteScrollObserver = null;
+let currentCollectionData = null;
+
 // DOM Elements
 const elements = {
     tabsContainer: null,
@@ -29,7 +37,10 @@ const elements = {
     modalPatch: null,
     modalDescription: null,
     modalSources: null,
-    loadingIndicator: null
+    loadingIndicator: null,
+    loadMoreBtn: null,
+    loadMoreContainer: null,
+    remainingSpan: null
 };
 
 // Initialize the application
@@ -67,6 +78,9 @@ function cacheElements() {
     elements.modalDescription = document.getElementById('modal-description');
     elements.modalSources = document.getElementById('modal-sources');
     elements.loadingIndicator = document.getElementById('loading-indicator');
+
+    // Create load more container dynamically
+    createLoadMoreButton();
 }
 
 // Set up event listeners
@@ -331,34 +345,147 @@ function switchCollection(collectionName) {
 function renderItems() {
     if (!collectionsData || !currentCollection) return;
 
-    const collection = collectionsData.Collections.find(c => c.CollectionName === currentCollection);
-    if (!collection) return;
+    currentCollectionData = collectionsData.Collections.find(c => c.CollectionName === currentCollection);
+    if (!currentCollectionData) return;
 
     // Filter items
-    let items = collection.Items.filter(item => filterState.passesFilters(item));
+    currentFilteredItems = currentCollectionData.Items.filter(item => filterState.passesFilters(item));
 
     // Sort items
     const sortFn = SORT_FUNCTIONS[currentSort] || SORT_FUNCTIONS['name'];
-    items.sort(sortFn);
+    currentFilteredItems.sort(sortFn);
+
+    // Reset pagination
+    currentRenderedCount = 0;
 
     // Update count
-    elements.itemsCount.textContent = `顯示 ${items.length} / ${collection.Items.length} 項`;
+    elements.itemsCount.textContent = `顯示 0 / ${currentFilteredItems.length} 項（共 ${currentCollectionData.Items.length} 項）`;
 
-    // Render grid
+    // Clear grid
     elements.itemsGrid.innerHTML = '';
 
-    if (items.length === 0) {
+    if (currentFilteredItems.length === 0) {
         renderNoResults(elements.itemsGrid);
+        hideLoadMoreButton();
         return;
     }
 
+    // Render first batch
+    renderMoreItems();
+}
+
+// Render more items (pagination)
+function renderMoreItems() {
+    if (isLoadingMore || currentRenderedCount >= currentFilteredItems.length) return;
+
+    isLoadingMore = true;
+    updateLoadMoreButtonState(true);
+
+    const startIndex = currentRenderedCount;
+    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, currentFilteredItems.length);
+
     // Use document fragment for better performance
     const fragment = document.createDocumentFragment();
-    for (const item of items) {
-        const card = createItemCard(item);
+    for (let i = startIndex; i < endIndex; i++) {
+        const card = createItemCard(currentFilteredItems[i]);
         fragment.appendChild(card);
     }
     elements.itemsGrid.appendChild(fragment);
+
+    currentRenderedCount = endIndex;
+
+    // Update count display (use cached currentCollectionData)
+    elements.itemsCount.textContent = `顯示 ${currentRenderedCount} / ${currentFilteredItems.length} 項（共 ${currentCollectionData.Items.length} 項）`;
+
+    // Show/hide load more button
+    if (currentRenderedCount < currentFilteredItems.length) {
+        showLoadMoreButton(currentFilteredItems.length - currentRenderedCount);
+    } else {
+        hideLoadMoreButton();
+    }
+
+    isLoadingMore = false;
+    updateLoadMoreButtonState(false);
+}
+
+// Create load more button
+function createLoadMoreButton() {
+    const container = document.createElement('div');
+    container.id = 'load-more-container';
+    container.className = 'load-more-container hidden';
+    container.innerHTML = `
+        <button id="load-more-btn" class="load-more-btn">載入更多</button>
+        <span id="remaining-count" class="remaining-count"></span>
+    `;
+
+    // Insert after items-grid
+    elements.itemsGrid.parentNode.insertBefore(container, elements.itemsGrid.nextSibling);
+
+    elements.loadMoreContainer = container;
+    elements.loadMoreBtn = document.getElementById('load-more-btn');
+    elements.remainingSpan = document.getElementById('remaining-count');
+
+    // Event listener
+    elements.loadMoreBtn.addEventListener('click', renderMoreItems);
+
+    // Infinite scroll
+    setupInfiniteScroll();
+}
+
+// Update load more button loading state
+function updateLoadMoreButtonState(loading) {
+    if (!elements.loadMoreBtn) return;
+
+    if (loading) {
+        elements.loadMoreBtn.textContent = '載入中...';
+        elements.loadMoreBtn.disabled = true;
+        elements.loadMoreBtn.classList.add('loading');
+    } else {
+        elements.loadMoreBtn.textContent = '載入更多';
+        elements.loadMoreBtn.disabled = false;
+        elements.loadMoreBtn.classList.remove('loading');
+    }
+}
+
+// Show load more button
+function showLoadMoreButton(remaining) {
+    if (elements.loadMoreContainer) {
+        elements.loadMoreContainer.classList.remove('hidden');
+        if (elements.remainingSpan) {
+            elements.remainingSpan.textContent = `（剩餘 ${remaining} 項）`;
+        }
+    }
+}
+
+// Hide load more button
+function hideLoadMoreButton() {
+    if (elements.loadMoreContainer) {
+        elements.loadMoreContainer.classList.add('hidden');
+    }
+}
+
+// Setup infinite scroll
+function setupInfiniteScroll() {
+    // Clean up old observer if exists (prevent memory leak)
+    if (infiniteScrollObserver) {
+        infiniteScrollObserver.disconnect();
+        infiniteScrollObserver = null;
+    }
+
+    infiniteScrollObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !isLoadingMore) {
+                renderMoreItems();
+            }
+        });
+    }, {
+        rootMargin: '200px'
+    });
+
+    // Observe the load more container
+    if (elements.loadMoreContainer) {
+        infiniteScrollObserver.observe(elements.loadMoreContainer);
+    }
 }
 
 // Perform search across all collections
