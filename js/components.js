@@ -221,14 +221,19 @@ function getSourceWikiUrl(source) {
     // Try exact match first if mapping is available
     if (huijiMapping && huijiMapping.sources) {
         let scName = null;
-        let urlPrefix = '';
 
         switch (sourceType) {
             case 'Instance':
                 scName = huijiMapping.sources.instances?.[cleanName];
+                if (scName) {
+                    return {
+                        url: `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(scName)}`,
+                        isSearch: false
+                    };
+                }
                 break;
             case 'Achievement':
-                // Achievement names might have description, try to extract just the title
+                // Achievement uses search page
                 const achieveMatch = cleanName.match(/^([^:：]+)/);
                 if (achieveMatch) {
                     scName = huijiMapping.sources.achievements?.[achieveMatch[1]];
@@ -236,21 +241,32 @@ function getSourceWikiUrl(source) {
                 if (!scName) {
                     scName = huijiMapping.sources.achievements?.[cleanName];
                 }
+                if (scName) {
+                    return {
+                        url: `https://ff14.huijiwiki.com/wiki/AchievementSearch?name=${encodeURIComponent(scName)}`,
+                        isSearch: true
+                    };
+                }
                 break;
             case 'Quest':
+                // Quest uses 任务: prefix
                 scName = huijiMapping.sources.quests?.[cleanName];
+                if (scName) {
+                    return {
+                        url: `https://ff14.huijiwiki.com/wiki/${encodeURIComponent('任务:' + scName)}`,
+                        isSearch: false
+                    };
+                }
                 break;
             case 'Container':
                 scName = huijiMapping.sources.items?.[cleanName];
-                urlPrefix = '物品:';
+                if (scName) {
+                    return {
+                        url: `https://ff14.huijiwiki.com/wiki/${encodeURIComponent('物品:' + scName)}`,
+                        isSearch: false
+                    };
+                }
                 break;
-        }
-
-        if (scName) {
-            return {
-                url: `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(urlPrefix + scName)}`,
-                isSearch: false
-            };
         }
     }
 
