@@ -863,8 +863,22 @@ body {
 }
 
 .about-page h2 {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     color: var(--text-primary);
+}
+
+.about-description {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+.about-description a {
+    color: var(--accent);
+}
+
+.about-description a:hover {
+    text-decoration: underline;
 }
 
 .about-links {
