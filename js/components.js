@@ -66,12 +66,28 @@ function createItemCard(item) {
     return card;
 }
 
+// Collection name translations
+const COLLECTION_NAMES = {
+    'Glamour': '裝備',
+    'Mounts': '坐騎',
+    'Minions': '寵物',
+    'Emotes': '表情',
+    'Hairstyles': '髮型',
+    'Triple Triad': '幻卡',
+    'Blue Mage': '青魔',
+    'Bardings': '鳥鞍',
+    'Orchestrions': '樂譜',
+    'Framer Kits': '肖像',
+    'Fashion Accessories': '時尚',
+    'Glasses': '眼鏡'
+};
+
 // Create collection tab button
 function createTabButton(collection, isActive) {
     const btn = document.createElement('button');
     btn.className = `tab-btn${isActive ? ' active' : ''}`;
     btn.dataset.collection = collection.CollectionName;
-    btn.textContent = collection.CollectionName;
+    btn.textContent = COLLECTION_NAMES[collection.CollectionName] || collection.CollectionName;
     return btn;
 }
 

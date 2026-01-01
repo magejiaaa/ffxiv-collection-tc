@@ -243,8 +243,10 @@ async function loadData() {
 function renderUI() {
     if (!collectionsData) return;
 
-    // Sort collections by OrderKey
-    const sortedCollections = [...collectionsData.Collections].sort((a, b) => a.OrderKey - b.OrderKey);
+    // Sort collections by OrderKey and filter out empty ones
+    const sortedCollections = [...collectionsData.Collections]
+        .filter(c => c.Items && c.Items.length > 0)
+        .sort((a, b) => a.OrderKey - b.OrderKey);
 
     // Render tabs
     elements.tabsContainer.innerHTML = '';
