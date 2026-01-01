@@ -151,13 +151,9 @@ function renderSourceItem(source) {
         return renderShopSource(source);
     }
 
-    // For Container type, use a unified treasure chest icon instead of item icons
-    let sourceIconUrl;
-    if (sourceType === 'Container') {
-        sourceIconUrl = getIconUrl(60465); // Treasure chest icon
-    } else {
-        sourceIconUrl = source.IconUrl || getIconUrl(SOURCE_TYPE_ICONS[sourceType] || 60414);
-    }
+    // Use source IconUrl if available (includes correct item icons for containers)
+    // Fall back to type-based icon only if no IconUrl provided
+    let sourceIconUrl = source.IconUrl || getIconUrl(SOURCE_TYPE_ICONS[sourceType] || 60414);
 
     let detailsHtml = '';
 
